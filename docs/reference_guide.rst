@@ -57,6 +57,15 @@ Memory
    :special-members:
 
 
+Azure Blob Storage
+------------------
+
+.. automodule:: margaritashotgun.msazure
+   :members:
+   :undoc-members:
+   :special-members:
+
+
 Remote Host
 -----------
 

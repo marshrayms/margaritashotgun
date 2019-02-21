@@ -25,6 +25,19 @@ To save a file to s3 replace the ``filename`` flag with ``--bucket``.  Ensure th
 
    margaritashotgun --server 172.16.20.10 --username root --key root_access.pem --module lime-3.13.0-74-generic.ko --bucket memory_capture_bucket
 
+Save Memory In Azure Blob Storage
+*********************************
+
+Use the ``--azure-sas-uri`` parameter to specify a SAS URI providing access to a blob container.
+
+.. code-block:: bash
+
+   margaritashotgun --server 172.16.20.10 --username root --key root_access.pem --module lime-3.13.0-74-generic.ko --azure-sas-uri https://...
+
+For step-by-step details, see:
+
+* :doc:`Azure Blob Storage <msazure>`
+
 Capture Multiple Machines
 *************************
 

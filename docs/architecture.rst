@@ -29,13 +29,16 @@ The new repository structure introduces several new requirements.
 
 1. **Optional** The public portion of the GPG used for signing modules and metadata should present at the root of the repository with the filename ``REPO_SIGNING_KEY.asc``.  If the signing key is not present the ``--gpg-no-verify`` flag must be used with Margarita Shotgun.
 2. **Optional** A JSON file with key metadata including the key fingerprint. REPO_SIGNING_KEY.json.
+
 Example:
-```
-{
-"uids": ["Lime Signing Key (Threat Response Official Lime Signing Key) <security@threatresponse.cloud>"],
-"fingerprint": "80DA92CB09161F241C8F9BC918BA980367172B17"
-}
-```
+
+.. code-block:: json
+
+  {
+      "uids": ["Lime Signing Key (Threat Response Official Lime Signing Key) <security@threatresponse.cloud>"],
+      "fingerprint": "80DA92CB09161F241C8F9BC918BA980367172B17"
+  }
+
 3. **Required** A folder must exist in at the path ``/repodata`` which contains the following files.
 
    1. **Required** ``repomd.xml`` contains repository metadata including one or more manifests of kernel modules.

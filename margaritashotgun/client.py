@@ -105,9 +105,9 @@ class Client():
 
     def map_config(self):
         config_list = []
-        keys = ['aws', 'host', 'logging', 'repository']
+        keys = ['aws', 'azure_blob', 'host', 'logging', 'repository']
         for host in self.config['hosts']:
-            values = [self.config['aws'], host, self.config['logging'],
+            values = [self.config['aws'], self.config['azure_blob'], host, self.config['logging'],
                       self.config['repository']]
             conf = dict(zip(keys, values))
             config_list.append(conf)

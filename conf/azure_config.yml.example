@@ -1,0 +1,9 @@
+azure_blob:
+    sas_uri: https://examplestorageaccount.blob.core.windows.net/container-name?sv=2019-01-01&sr=c&sig=dGhpcyBpcyBqdXN0IGFuIGV4YW1wbGUK&se=2019-03-01T04%3A15%3A21Z&sp=w
+hosts:
+    - addr:     52.36.170.XXX
+      port:     22
+      username: ubuntu
+      key:      dev.pem
+      module:   lime-3.13.0-74-generic.ko
+workers: 1

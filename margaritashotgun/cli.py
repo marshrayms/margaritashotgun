@@ -4,12 +4,13 @@ import logging
 import os
 import yaml
 from yaml import YAMLError
+import margaritashotgun.msazure
 from margaritashotgun import __version__
 from margaritashotgun.exceptions import *
 from margaritashotgun.settings import *
 logger = logging.getLogger(__name__)
 
-default_allowed_keys = ["aws", "hosts", "workers", "logging", "repository"]
+default_allowed_keys = ["aws", "azure_blob", "hosts", "workers", "logging", "repository"]
 aws_allowed_keys = ["bucket"]
 host_allowed_keys = ["addr", "port", "username", "password",
                     "module", "key", "filename", "jump_host"]
@@ -21,6 +22,8 @@ default_host_config = dict(zip(host_allowed_keys,
 default_jump_host_config = dict(zip(jump_host_allowed_keys,
                                     [None]*len(jump_host_allowed_keys)))
 default_config = {"aws": {"bucket": None},
+                  "azure_blob": {
+                      "sas_uri": None},
                   "hosts": [],
                   "workers": "auto",
                   "logging": {
@@ -102,6 +105,10 @@ class Cli():
                             help='memory dump output bucket')
         output.add_argument('--output-dir',
                             help='memory dump output directory')
+
+        azure_blob = parser.add_argument_group()
+        azure_blob.add_argument('--azure-sas-uri', required=False,
+            help='output to Azure blob container specified by SAS URI')
 
         log = parser.add_argument_group()
         log.add_argument('--log-dir',
@@ -201,7 +208,8 @@ class Cli():
                            repository=dict(enabled=arguments.repository,
                                            url=url,
                                            manifest=arguments.repository_manifest,
-                                           gpg_verify=arguments.gpg_verify))
+                                           gpg_verify=arguments.gpg_verify),
+                           azure_blob=dict(sas_uri=arguments.azure_sas_uri))
 
         if arguments.server is not None:
 
@@ -333,6 +341,8 @@ class Cli():
         except KeyError:
             pass
 
+        azure_blob = margaritashotgun.msazure.validate_azure_config(config)
+
         # optional configuration
         try:
             for key in config['logging'].keys():
@@ -367,6 +377,16 @@ class Cli():
 
         if bucket and filename:
             raise InvalidConfigurationError('bucket', config['aws']['bucket'],
-                                            reason=('bucket configuration is'
-                                                    'incompatible with filename'
+                                            reason=('bucket configuration is '
+                                                    'incompatible with filename '
+                                                    'configuration in hosts'))
+        elif azure_blob and filename:
+            raise InvalidConfigurationError('azure_blob', 'azure_blob',
+                                            reason=('azure_blob configuration is '
+                                                    'incompatible with filename '
+                                                    'configuration in hosts'))
+        elif azure_blob and bucket:
+            raise InvalidConfigurationError('azure_blob', 'azure_blob',
+                                            reason=('azure_blob configuration is '
+                                                    'incompatible with bucket '
                                                     'configuration in hosts'))

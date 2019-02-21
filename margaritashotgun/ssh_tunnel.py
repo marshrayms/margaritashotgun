@@ -52,7 +52,7 @@ class SSHTunnel():
         type: local_port: int
         param: local_port: local tunnel endpoint ip binding
         type: remote_address: str
-        param: remote_address: Remote tunnel endpoing ip binding
+        param: remote_address: Remote tunnel endpoint ip binding
         type: remote_port: int
         param: remote_port: Remote tunnel endpoint port binding
         """
@@ -94,7 +94,7 @@ class Forward(threading.Thread):
         type: local_port: int
         param: local_port: local tunnel endpoint ip binding
         type: remote_address: str
-        param: remote_address: Remote tunnel endpoing ip binding
+        param: remote_address: Remote tunnel endpoint ip binding
         type: remote_port: int
         param: remote_port: Remote tunnel endpoint port binding
         type: transport: :py:class:`paramiko.Transport`

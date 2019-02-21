@@ -34,6 +34,7 @@ def process(conf):
     filename = conf['host']['filename']
     key = conf['host']['key']
     bucket = conf['aws']['bucket']
+    azure_blob_config = conf['azure_blob']
     progressbar = conf['host']['progressbar']
     tunnel_addr = '127.0.0.1'
     tunnel_port = random.randint(10000, 30000)
@@ -50,6 +51,8 @@ def process(conf):
 
     if bucket is not None:
         dest = OutputDestinations.s3
+    elif any([ v is not None for v in azure_blob_config.values() ]):
+        dest = OutputDestinations.azure_blob
     else:
         dest = OutputDestinations.local
 
@@ -79,7 +82,7 @@ def process(conf):
         lime_loaded = host.wait_for_lime(tunnel_port)
 
         if lime_loaded:
-            result = host.capture_memory(dest, filename, bucket, progressbar)
+            result = host.capture_memory(dest, filename, bucket, azure_blob_config, progressbar)
         else:
             logger.debug("lime failed to load on {0}".format(remote_addr))
             result = False
@@ -271,13 +274,13 @@ class Host():
         """
         self.shell.execute(self.commands.unload_lime.value)
 
-    def capture_memory(self, destination, filename, bucket, progressbar):
+    def capture_memory(self, destination, filename, bucket, azure_blob_config, progressbar):
         """
         """
         mem_size = self.mem_size()
         mem = Memory(self.remote_addr, mem_size, progressbar=progressbar)
         mem.capture(self.tunnel_addr, self.tunnel_port, destination=destination,
-                    filename=filename, bucket=bucket)
+                    filename=filename, bucket=bucket, azure_blob_config=azure_blob_config)
 
     # TODO: move this to RemoteShell?
     # TODO: eventually hook this in to our logger

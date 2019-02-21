@@ -18,57 +18,59 @@ Run ``margaritashotgun -h`` at the command line, detailed information on flags i
 Quick Reference
 ---------------
 
-+---------------------------+--------------------------+-------------------------------------------+
-| Flag                      | Use                      | Notes                                     |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--config``              | path to config file      | See the **Configuration File** section    |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--server``              | ip of remote server      | DNS records may also be used              |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--version``             | print version info       |                                           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--bucket``              | output S3 bucket         | Incommpatible with ``-o``                 |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--output-dir``          | local output folder      | Incompatible with ``-b``                  |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--port``                | ssh port                 | ``22`` is used unless specified           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--username``            | ssh username             | Username for ssh authentication           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--module``              | lime kernel module       | Required if no repository is enabled      |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--password``            | ssh password             | Unlockes RSA key when used with ``-k``    |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--key``                 | RSA Key                  | Unlocked via ``-p`` if supplied           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--jump-server``         | ip of jump host          | DNS records may also be used              |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--jump-port``           | jump host ssh port       | ``22`` is used unless specified           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--jump-username``       | jump host ssh username   | Username for jump host ssh authentication |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--jump-password``       | jump host ssh password   |                                           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--jump-key``            | jump host RSA key        |                                           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--filename``            | output file              |                                           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--repository``          | enable kernel repo       | Default state is disabled                 |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--repository-url``      | custom repo url          | Defaults to threat response modules       |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--repository-manifest`` | custom repo url          | Defaults to "primary"                     |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--gpg-no-verify``       | disable signature checks |                                           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--workers``             | worker count             | Constrains parallel captures              |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--verbose``             | log debug messages       |                                           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--log-dir``             | log directory            |                                           |
-+---------------------------+--------------------------+-------------------------------------------+
-| ``--log-prefix``          | log file prefix          |                                           |
-+---------------------------+--------------------------+-------------------------------------------+
++-------------------------------+--------------------------+------------------------------------------------------------+
+| Flag                          | Use                      | Notes                                                      |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--config``                  | path to config file      | See the **Configuration File** section                     |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--server``                  | ip of remote server      | DNS records may also be used                               |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--version``                 | print version info       |                                                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--bucket``                  | output S3 bucket         | Incompatible with ``--output-dir`` and ``--azure-sas-uri`` |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--output-dir``              | local output folder      | Incompatible with ``--bucket`` and ``--azure-sas-uri``     |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--azure-sas-uri``           | Azure blob SAS URI       | Incompatible with ``--output-dir`` and ``--bucket``        |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--port``                    | ssh port                 | ``22`` is used unless specified                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--username``                | ssh username             | Username for ssh authentication                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--module``                  | lime kernel module       | Required if no repository is enabled                       |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--password``                | ssh password             | Unlocks RSA key when used with ``--key``                   |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--key``                     | RSA Key                  | Unlocked via ``--password`` if supplied                    |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--jump-server``             | ip of jump host          | DNS records may also be used                               |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--jump-port``               | jump host ssh port       | ``22`` is used unless specified                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--jump-username``           | jump host ssh username   | Username for jump host ssh authentication                  |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--jump-password``           | jump host ssh password   |                                                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--jump-key``                | jump host RSA key        |                                                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--filename``                | output file              |                                                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--repository``              | enable kernel repo       | Default state is disabled                                  |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--repository-url``          | custom repo url          | Defaults to threat response modules                        |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--repository-manifest``     | custom repo url          | Defaults to "primary"                                      |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--gpg-no-verify``           | disable signature checks |                                                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--workers``                 | worker count             | Constrains parallel captures                               |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--verbose``                 | log debug messages       |                                                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--log-dir``                 | log directory            |                                                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
+| ``--log-prefix``              | log file prefix          |                                                            |
++-------------------------------+--------------------------+------------------------------------------------------------+
 
 Config
 ------
@@ -91,13 +93,20 @@ Bucket
 ------
 
 The ``--bucket`` flag specifies the destination bucket when dumping memory to s3.
-This flag cannot be used in conjunction wth ``-o`` or ``--output-dir``.
+This flag cannot be used in conjunction with ``--output-dir`` or ``--azure-sas-uri``.
 
 Output-Dir
 ----------
 
 The ``--output-dir`` flags specify the destination folder when dumping memory to the local filesystem.
-This flag  cannot be used in conjunction with ``--bucket``.
+This flag  cannot be used in conjunction with ``--bucket`` or ``--azure-sas-uri``.
+
+Azure-sas-uri
+-------------
+
+The ``--azure-sas-uri`` flag provides access to a destination blob storage container when dumping memory to MS Azure.
+For details, see `Save Memory In Azure Blob Storage <msazure>`.
+This flag cannot be used in conjunction wth ``--output-dir`` or ``--bucket``.
 
 Port
 ----
@@ -125,13 +134,13 @@ When used in conjuction with the ``--key`` flag this password will be used to un
 Key
 ---
 
-The ``--key`` flag accepts a relative or absolute path to a a private key file used for authentication when connecting to the server specified by ``-server``.
-If the private key file specified is password protected use the ``-p`` or ``--password`` flags to specify the password that unlocks the private key.
+The ``--key`` flag accepts a relative or absolute path to a private key file used for authentication when connecting to the server specified by ``-server``.
+If the private key file specified is password protected use the ``--password`` flag to specify the password that unlocks the private key.
 
 Filename
 --------
 
-The ``--filename`` flags specify the name of the file memory will be saved to when dumping to the local filesystem.
+The ``--filename`` flag specifies the name of the file memory will be saved to when dumping to the local filesystem.
 The file will be saved to the local directory unless the ``--output-dir`` option is configured.
 
 Repository
@@ -161,7 +170,7 @@ Workers
 The ``--workers`` flag specifies how many worker processes will be spawned to process memory captures in parallel.
 The default value for this flag is ``auto`` which will spawn a process per remote host up to the number of cpu cores on the local system.
 Integer values can be provided instead of the ``auto`` keyword.
-Eg. ``--workers 3`` will process 3 memory captures simultaneously.
+E.g., ``--workers 3`` will process 3 memory captures simultaneously.
 
 Verbose
 -------

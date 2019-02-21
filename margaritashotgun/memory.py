@@ -5,6 +5,7 @@ import select
 import socket
 import s3fs
 import logging
+import margaritashotgun
 from margaritashotgun.exceptions import *
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 class OutputDestinations(Enum):
     local = 'local'
     s3 = 's3'
+    azure_blob = 'azure_blob'
 
 
 class Memory():
@@ -61,7 +63,8 @@ class Memory():
         return size_in_kb * 1024
 
     def capture(self, tunnel_addr, tunnel_port, filename=None,
-                bucket=None, destination=None):
+                bucket=None, destination=None,
+                azure_blob_config=None):
         """
         Captures memory based on the provided OutputDestination
 
@@ -75,9 +78,9 @@ class Memory():
         :param bucket: output s3 bucket
         :type destination: :py:class:`margaritashotgun.memory.OutputDestinations`
         :param destination: OutputDestinations member
+        :type azure_blob_config: dict
+        :param azure_blob_config: dict containing 'account_name', 'connection_string', etc.
         """
-        if filename is None:
-            raise MemoryCaptureAttributeMissingError('filename')
         if destination == OutputDestinations.local:
             logger.info("{0}: dumping to file://{1}".format(self.remote_addr,
                                                             filename))
@@ -88,6 +91,10 @@ class Memory():
             logger.info(("{0}: dumping memory to s3://{1}/"
                          "{2}".format(self.remote_addr, bucket, filename)))
             result = self.to_s3(bucket, filename, tunnel_addr, tunnel_port)
+        elif destination == OutputDestinations.azure_blob:
+            result = margaritashotgun.msazure.capture_to_azblob(
+                            azure_blob_config, filename,
+                            tunnel_addr, tunnel_port, self)
         else:
             raise MemoryCaptureOutputMissingError(self.remote_addr)
 

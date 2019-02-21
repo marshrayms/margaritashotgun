@@ -167,7 +167,7 @@ class RemoteShell():
         :param callback: function to call when execution completes
         """
         try:
-            logger.debug(('{0}: execute async "{1}"'
+            logger.debug(('{0}: execute async "{1}" '
                           'with callback {2}'.format(self.target_address,
                                                      command,
                                                      callback)))

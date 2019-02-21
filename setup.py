@@ -41,6 +41,9 @@ setup(
         'python-gnupg==0.3.9',
         'prompt_toolkit'
     ],
+    extras_require={
+        'azure-storage-blob': ['azure-storage-blob>=1.4'],
+    },
     tests_require=[
         'pytest',
         'pytest-cov',

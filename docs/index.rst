@@ -13,6 +13,7 @@ Python Remote Memory Aquisition
    user_guide
    reference_guide
    architecture
+   msazure
    development
    about
 

@@ -41,7 +41,7 @@ def capture_to_azblob(azure_blob_config, filename, tunnel_addr, tunnel_port, mem
                      "e.g. 'pip install azure-storage-blob'.")
         raise
 
-    if filename is None:
+    if not filename:
         raise MemoryCaptureAttributeMissingError('filename')
 
     # Convert the supplied parameters into what we will need for the blob API
@@ -58,7 +58,7 @@ def set_or_compare(d, k, v):
     """
     v_current = d.get(k)
     if v_current is not None and v_current != v:
-        raise InvalidConfigurationError("Contradictory values for {}: {} and {}".format(k, v_current, v))
+        raise InvalidConfigurationError(k, "Contradictory values for {}: {} and {}".format(k, v_current, v))
     d[k] = v
 
 def interpret_blob_config(blob_config):
@@ -79,8 +79,8 @@ def interpret_blob_config(blob_config):
     """
 
     sas_uri = blob_config.get('sas_uri')
-    if sas_uri is None or len(sas_uri) == 0:
-        raise InvalidConfigurationError("Expecting sas_uri")
+    if not sas_uri:
+        raise InvalidConfigurationError('sas_uri', "Expecting sas_uri")
 
     if sys.version_info[0] < 3:
         from urlparse import urlparse
@@ -88,19 +88,15 @@ def interpret_blob_config(blob_config):
         from urllib.parse import urlparse
 
     ur = urlparse(sas_uri)
-    logger.debug('sas_uri scheme: {}'  .format(ur.scheme))
-    logger.debug('sas_uri netloc: {}'  .format(ur.netloc))
-    logger.debug('sas_uri path: {}'    .format(ur.path))
-    logger.debug('sas_uri params: len={}'  .format(len(ur.params or '')))
-    logger.debug('sas_uri query: len={}'   .format(len(ur.query or '')))
-    logger.debug('sas_uri fragment: {}'.format(ur.fragment))
-    logger.debug('sas_uri username: {}'.format(ur.username))
-    logger.debug('sas_uri password: len={}'.format(len(ur.password or '')))
-    logger.debug('sas_uri hostname: {}'.format(ur.hostname))
-    logger.debug('sas_uri port: {}'    .format(ur.port))
+    logger.debug("sas_uri scheme: '{}', netloc: '{}', "
+                 "path: '{}', params: len={}, query: len={}, "
+                 "fragment: '{}', username: '{}', password: len={}, "
+                 "hostname: '{}', port: {}".format(
+                 ur.scheme, ur.netloc, ur.path, len(ur.params or ''), len(ur.query or ''),
+                 ur.fragment, ur.username, len(ur.password or ''), ur.hostname, ur.port))
 
     if ur.scheme != 'https':
-        raise InvalidConfigurationError("SAS URI scheme '{}' should be 'https'.".format(ur.scheme))
+        raise InvalidConfigurationError('sas_uri', "SAS URI scheme '{}' should be 'https'.".format(ur.scheme))
 
     # Remove any leading or trailing '/' from the path to obtain the container name
     container = ur.path
@@ -113,29 +109,29 @@ def interpret_blob_config(blob_config):
             break
     set_or_compare(blob_config, 'container_name', container)
 
-    if not (ur.username is None or len(ur.username) == 0):
-        raise InvalidConfigurationError("SAS URI username '{}' not supported.".format(ur.username))
+    if ur.username:
+        raise InvalidConfigurationError('sas_uri', "SAS URI username '{}' not supported.".format(ur.username))
 
-    if not (ur.password is None or len(ur.password) == 0):
-        raise InvalidConfigurationError("SAS URI password not supported.", ur.password)
+    if ur.password:
+        raise InvalidConfigurationError('sas_uri', "SAS URI password not supported.", ur.password)
 
     if not (ur.port is None or ur.port == 443):
-        raise InvalidConfigurationError("SAS URI port '{}' not supported.".format(ur.port))
+        raise InvalidConfigurationError('sas_uri', "SAS URI port '{}' not supported.".format(ur.port))
 
     # storage_account.service.endpoint_suffix, e.g., 'example.blob.core.windows.net'
-    if ur.hostname is None or len(ur.hostname) == 0:
-        raise InvalidConfigurationError("SAS URI hostname expected.")
+    if not ur.hostname:
+        raise InvalidConfigurationError('sas_uri', "SAS URI hostname expected.")
     account_name, service, endpoint_suffix = ur.hostname.split('.', 2)
     if service != 'blob':
-        raise InvalidConfigurationError("SAS URI service '{}' should be 'blob'.".format(service))
+        raise InvalidConfigurationError('sas_uri', "SAS URI service '{}' should be 'blob'.".format(service))
     set_or_compare(blob_config, 'account_name', account_name)
 
     if endpoint_suffix.find('.') < 0:
-        raise InvalidConfigurationError("SAS URI endpoint suffix '{}' should look like a DNS domain name.".format(endpoint_suffix))
+        raise InvalidConfigurationError('sas_uri', "SAS URI endpoint suffix '{}' should look like a DNS domain name.".format(endpoint_suffix))
     set_or_compare(blob_config, 'endpoint_suffix', endpoint_suffix)
 
-    if ur.query is None or len(ur.query) == 0:
-        raise InvalidConfigurationError("SAS URI should have a SAS token query string")
+    if not ur.query:
+        raise InvalidConfigurationError('sas_uri', "SAS URI should have a SAS token query string")
 
     sas_token = '?' + ur.query
     set_or_compare(blob_config, 'sas_token', sas_token)
@@ -163,8 +159,7 @@ def memory_to_azure_blob(memory, blob_name, azure_blob_config, tunnel_addr, tunn
     from azure.storage.blob import BlockBlobService
 
     if memory.progressbar:
-        memory.bar = ProgressBar(widgets=memory.widgets,
-                               maxval=memory.max_size).start()
+        memory.bar = ProgressBar(maxval=memory.max_size, widgets=memory.widgets)
         memory.bar.start()
 
     memory.transfered = 0
@@ -173,19 +168,19 @@ def memory_to_azure_blob(memory, blob_name, azure_blob_config, tunnel_addr, tunn
     blobservice_args = { }
 
     account_name = azure_blob_config.get('account_name')
-    if account_name is not None:
+    if account_name:
         blobservice_args['account_name'] = account_name
         logger.debug('BlockBlobService account_name: {0}'.format(account_name))
 
     # Not supporting account_key in favor of SAS token authorization.
 
     sas_token = azure_blob_config.get('sas_token')
-    if sas_token is not None:
+    if sas_token:
         blobservice_args['sas_token'] = sas_token
         logger.debug('BlockBlobService sas_token: [redacted]')
 
     endpoint_suffix = azure_blob_config.get('endpoint_suffix')
-    if endpoint_suffix is not None:
+    if endpoint_suffix:
         blobservice_args['endpoint_suffix'] = endpoint_suffix
         logger.debug('BlockBlobService endpoint_suffix: {0}'.format(endpoint_suffix))
 
@@ -219,7 +214,7 @@ def memory_to_azure_blob(memory, blob_name, azure_blob_config, tunnel_addr, tunn
             traceback.format_exc())
         raise
     finally:
-        if memory.sock is not None:
+        if memory.sock:
             memory.sock.close()
 
     memory.cleanup()
